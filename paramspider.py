@@ -6,7 +6,7 @@ from urllib.parse import urlparse, unquote
 import argparse
 import os
 import sys
-import time
+import time 
 
 start_time = time.time()
 
@@ -15,13 +15,13 @@ def main():
         os.system('cls')
     banner = """\u001b[36m
 
-         ___                               _    __
+         ___                               _    __       
         / _ \___ ________ ___ _  ___ ___  (_)__/ /__ ____
        / ___/ _ `/ __/ _ `/  ' \(_-</ _ \/ / _  / -_) __/
-      /_/   \_,_/_/  \_,_/_/_/_/___/ .__/_/\_,_/\__/_/
-                                  /_/     \u001b[0m
-
-                           \u001b[32m - coded with <3 by Devansh Batham\u001b[0m
+      /_/   \_,_/_/  \_,_/_/_/_/___/ .__/_/\_,_/\__/_/   
+                                  /_/     \u001b[0m               
+                            
+                           \u001b[32m - coded with <3 by Devansh Batham\u001b[0m 
     """
     print(banner)
 
@@ -44,6 +44,8 @@ def main():
     with open(args.file, 'r') as file:
         urls = file.read().splitlines()
 
+    all_final_uris = []
+
     for url in urls:
         domain = urlparse(url).netloc
         if not domain:
@@ -54,7 +56,7 @@ def main():
             url = f"https://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=txt&fl=original&collapse=urlkey&page=/"
         else:
             url = f"https://web.archive.org/cdx/search/cdx?url={domain}/*&output=txt&fl=original&collapse=urlkey&page=/"
-
+        
         retry = True
         retries = 0
         while retry and retries <= int(args.retries):
@@ -62,9 +64,10 @@ def main():
             retries += 1
         if response == False:
             continue
-        response = unquote(response)
 
-        # for extensions to be excluded
+        response = unquote(response)
+       
+        # for extensions to be excluded 
         black_list = []
         if args.exclude:
             if "," in args.exclude:
@@ -73,13 +76,15 @@ def main():
                     black_list[i] = "." + black_list[i]
             else:
                 black_list.append("." + args.exclude)
-
-        else:
+                 
+        else: 
             black_list = [] # for blacklists
         if args.exclude:
             print(f"\u001b[31m[!] URLs containing these extensions will be excluded from the results: {black_list}\u001b[0m\n")
-
+        
         final_uris = extractor.param_extract(response, args.level, black_list, args.placeholder)
+        all_final_uris.extend(final_uris)
+
         save_it.save_func(final_uris, args.output, domain)
 
         if not args.quiet:
@@ -89,14 +94,20 @@ def main():
 
         print(f"\n\u001b[32m[+] Total number of retries:  {retries-1}\u001b[31m")
         print(f"\u001b[32m[+] Total unique URLs found: {len(final_uris)}\u001b[31m")
-        if args.output:
-            if "/" in args.output:
-                print(f"\u001b[32m[+] Output is saved here: \u001b[31m \u001b[36m{args.output}\u001b[31m")
-            else:
-                print(f"\u001b[32m[+] Output is saved here: \u001b[31m \u001b[36moutput/{args.output}\u001b[31m")
+
+    if args.output:
+        if "/" in args.output:
+            output_file = args.output
         else:
-            print(f"\u001b[32m[+] Output is saved here: \u001b[31m \u001b[36moutput/{domain}.txt\u001b[31m")
-        print("\n\u001b[31m[!] Total execution time: %ss\u001b[0m" % str((time.time() - start_time))[:-12])
+            output_file = f"output/{args.output}"
+    else:
+        output_file = f"output/all_urls.txt"
+
+    with open(output_file, 'w') as file:
+        file.write('\n'.join(all_final_uris))
+
+    print(f"\n\u001b[32m[+] All URLs are saved here: \u001b[31m \u001b[36m{output_file}\u001b[31m")
+    print("\n\u001b[31m[!] Total execution time: %ss\u001b[0m" % str((time.time() - start_time))[:-12])
 
 if __name__ == "__main__":
     main()
