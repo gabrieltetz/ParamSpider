@@ -26,7 +26,7 @@ def main():
     print(banner)
 
     parser = argparse.ArgumentParser(description='ParamSpider a parameter discovery suite')
-    parser.add_argument('-s', '--subs', help='Set False for no subs [ex: --subs False]', default=True)
+    parser.add_argument('-s', '--subs', help='Set False for no subs [ex: --subs False]', default=False)
     parser.add_argument('-l', '--level', help='For nested parameters [ex: --level high]')
     parser.add_argument('-e', '--exclude', help='Extensions to exclude [ex: --exclude php,aspx]')
     parser.add_argument('-o', '--output', help='Output file name [by default it is \'domain.txt\']')
